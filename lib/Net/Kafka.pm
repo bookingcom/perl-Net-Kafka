@@ -9,7 +9,7 @@ our @ISA = qw/Exporter/;
 our (@EXPORT_OK, %EXPORT_TAGS);
 
 BEGIN {
-    our $VERSION = "1.04";
+    our $VERSION = "1.05";
     my $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
