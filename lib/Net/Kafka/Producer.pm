@@ -70,6 +70,8 @@ sub _setup_signal_watcher {
 
 sub _signal_watcher_cb {
     my $self = shift;
+    return if $self->{_is_closed};
+
     my $signals_count = sysread $self->{_read_queue_fd}, my $signal, 1;
     if (! defined $signals_count) {
         $! == EAGAIN and return;
@@ -232,10 +234,14 @@ sub _check_if_closed {
 sub close {
     my $self = shift;
     return if $self->{_is_closed};
-    close $self->{_read_queue_fd};
-    close $self->{_write_queue_fd};
+
     $self->{_topics} = {}; # avoid use-after-free errors from topic destruction
     $self->{_kafka}->close() if defined $self->{_kafka};
+
+    $self->{_watcher} = undef;
+    close $self->{_read_queue_fd};
+    close $self->{_write_queue_fd};
+
     $self->{_is_closed} = 1;
 }
 
