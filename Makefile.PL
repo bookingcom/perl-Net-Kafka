@@ -53,6 +53,20 @@ WriteMakefile(
     dist          => {
         PREOP => $preop,
     },
+    META_MERGE    => {
+        "meta-spec" => { version => 2 },
+        resources => {
+            homepage    => 'https://github.com/bookingcom/perl-Net-Kafka',
+            bugtracker  => {
+                web => 'https://github.com/bookingcom/perl-Net-Kafka/issues'
+            },
+            repository => {
+                type    => 'git',
+                url     => 'https://github.com/bookingcom/perl-Net-Kafka.git',
+                web     => 'https://github.com/bookingcom/perl-Net-Kafka',
+            },
+        },
+    },
     CONFIGURE_REQUIRES  => {
         'ExtUtils::MakeMaker' => 0,
         'ExtUtils::PkgConfig' => 0,
