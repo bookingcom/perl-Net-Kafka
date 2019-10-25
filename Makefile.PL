@@ -1,3 +1,4 @@
+use 5.22.0;
 use strict;
 use warnings;
 
@@ -35,7 +36,7 @@ WriteMakefile(
         'Osama Elsayed <osama.elsayed@booking.com>',
         'Eduardo Dalla Favera <eduardo.dallafavera@booking.com>',
         'Pavel Gurkov <pavel.gurkov@booking.com>',
-        'Przemysław Iskra <sparky@pld-linux.org>',
+        'Przemyslaw Iskra <sparky@pld-linux.org>',
         'Alex Mironov <alex.mironov@booking.com>',
         'Pavel Shaydo <zwon@cpan.org>',
     ],
@@ -67,6 +68,7 @@ WriteMakefile(
             },
         },
     },
+    MIN_PERL_VERSION    => '5.22.0',
     CONFIGURE_REQUIRES  => {
         'ExtUtils::MakeMaker' => 0,
         'ExtUtils::PkgConfig' => 0,

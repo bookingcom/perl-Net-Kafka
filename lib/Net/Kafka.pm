@@ -9,7 +9,7 @@ our @ISA = qw/Exporter/;
 our (@EXPORT_OK, %EXPORT_TAGS);
 
 BEGIN {
-    our $VERSION = "1.05";
+    our $VERSION = "1.06";
     my $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -151,7 +151,7 @@ Net::Kafka - High-performant Perl client for Apache Kafka
 =head1 DESCRIPTION
 
 This module provides Perl bindings to librdkafka C client library (https://github.com/edenhill/librdkafka).
-It is heavily inspired by Kafka::Librd module originally developed by Pavel Shaydo (https://github.com/trinitum/perl-Kafka-Librd).
+It is heavily inspired by L<Kafka::Librd> module originally developed by Pavel Shaydo (https://github.com/trinitum/perl-Kafka-Librd).
 
 Please refer to the following modules documentation in order to understand how to use it:
 
@@ -266,6 +266,8 @@ Explicitly closees C<Net::Kafka::Producer> instance and underlying librdkafka ha
 
 The Net::Kafka::Consumer class provides interface to librdkafka's consumer functionality. It supports both "distributed" (subscription based) and
 "simple" (manual partition assignment) modes of work.
+
+=head2 METHODS
 
 =over 4
 
