@@ -22,9 +22,6 @@ warn sprintf(
 
 print "Compiling Net::Kafka with librdkafka $rdkafka{modversion}\n\n";
 
-my $preop = 'perl -MPod::Markdown -e \'Pod::Markdown->new->filter(@ARGV)\' $(VERSION_FROM) | tee $(DISTVNAME)/README.md > README.md;' .
-            'pod2readme $(VERSION_FROM) $(DISTVNAME)/README';
-
 WriteMakefile(
     NAME          => 'Net::Kafka',
     DISTNAME      => 'Net-Kafka',
@@ -50,9 +47,6 @@ WriteMakefile(
         'AnyEvent'               => 0,
         'Test::More'             => 0,
         'AnyEvent::XSPromises'   => 0,
-    },
-    dist          => {
-        PREOP => $preop,
     },
     META_MERGE    => {
         "meta-spec" => { version => 2 },
