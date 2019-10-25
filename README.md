@@ -52,7 +52,7 @@ Net::Kafka - High-performant Perl client for Apache Kafka
 # DESCRIPTION
 
 This module provides Perl bindings to librdkafka C client library (https://github.com/edenhill/librdkafka).
-It is heavily inspired by Kafka::Librd module originally developed by Pavel Shaydo (https://github.com/trinitum/perl-Kafka-Librd).
+It is heavily inspired by [Kafka::Librd](https://metacpan.org/pod/Kafka%3A%3ALibrd) module originally developed by Pavel Shaydo (https://github.com/trinitum/perl-Kafka-Librd).
 
 Please refer to the following modules documentation in order to understand how to use it:
 
@@ -139,6 +139,8 @@ It is highly suggested to familirize yourself with both [AnyEvent](https://metac
 
 The Net::Kafka::Consumer class provides interface to librdkafka's consumer functionality. It supports both "distributed" (subscription based) and
 "simple" (manual partition assignment) modes of work.
+
+## METHODS
 
 - new()
 
