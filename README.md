@@ -1,5 +1,7 @@
 # NAME
 
+[![Build Status](https://travis-ci.com/bookingcom/perl-Net-Kafka.svg?branch=master)](https://travis-ci.com/bookingcom/perl-Net-Kafka)
+
 Net::Kafka - High-performant Perl client for Apache Kafka
 
 # SYNOPSIS
