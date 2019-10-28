@@ -85,7 +85,7 @@ BEGIN {
 sub partitions_for {
     my ($self, $topic, $timeout_ms) = @_;
     $timeout_ms //= DEFAULT_METADATA_TIMEOUT;
-    my $metadata = $self->metadata($self->topic($topic), $timeout_ms);
+    my $metadata = $self->topic($topic)->metadata($timeout_ms);
     my @topics   = grep { $_->{topic_name} eq $topic } @{ $metadata->{topics} };
     die sprintf("Unable to fetch metadata for topic %s", $topic)
         if scalar @topics != 1;
