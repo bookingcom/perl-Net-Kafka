@@ -12,7 +12,7 @@ use constant LIBRDKAFKA_MIN_VERSION => "1.0.0";
 # of the system-wide, do something like:
 # PKG_CONFIG_PATH=/usr/local/lib/pkgconfig perl Makefile.PL
 # or whatever is the actual installation path
-my %rdkafka = ExtUtils::PkgConfig->find( 'rdkafka' );
+my %rdkafka = ExtUtils::PkgConfig->find('rdkafka');
 
 warn sprintf(
     "WARNING: Installed librdkafka version %s is lower than tested %s",

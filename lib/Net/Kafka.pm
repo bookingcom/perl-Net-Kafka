@@ -150,8 +150,8 @@ Net::Kafka - High-performant Perl client for Apache Kafka
 
 =head1 DESCRIPTION
 
-This module provides Perl bindings to librdkafka C client library (https://github.com/edenhill/librdkafka).
-It is heavily inspired by L<Kafka::Librd> module originally developed by Pavel Shaydo (https://github.com/trinitum/perl-Kafka-Librd).
+This module provides Perl bindings to L<librdkafka|https://github.com/edenhill/librdkafka> C client library.
+It is heavily inspired by L<Kafka::Librd> module originally developed by Pavel Shaydo.
 
 Please refer to the following modules documentation in order to understand how to use it:
 
@@ -173,30 +173,21 @@ C<Net::Kafka::Consumer> - consumer interface that supports both Simple and Distr
 GNU make
 
 =item *
-pthreads
-
-=item *
 librdkafka >= 1.0.0
-
-=item *
-lz (optional, for gzip compression support)
-
-=item *
-libssl (optional, for SSL and SASL SCRAM support)
-
-=item *
-libsasl2 (optional, for SASL GSSAPI support)
-
-=item *
-libzstd (optional, for ZStd compression support)
 
 =back
 
 =head1 INSTALLATION
 
-First download and build librdkafka (https://github.com/edenhill/librdkafka#building).
+First install librdkafka (L<https://github.com/edenhill/librdkafka#installation>).
 
-Then to install this module run the following commands:
+=head2 BUILD FROM CPAN
+
+    cpanm install Net::Kafka
+
+=head2 BUILD FROM SOURCE
+
+Sources are available on Github: L<https://github.com/bookingcom/perl-Net-Kafka>.
 
     perl Makefile.pl
     make
@@ -226,15 +217,15 @@ Note that only C<error_cb> and C<stats_cb> callbacks are supported for Producer.
 =item produce()
 
     my $promise = $producer->produce(
-        payload => "my_message",
-        topic   => "my_topic",
-        key     => "my_key",    # optional
-        timestamp => 1234567,   # optional, if not specified current local timestamp will be used
-        partition => 0          # optional, if not specified internal librdkafka partitioner will be used
-        headers   => $headers,  # Optional, see Net::Kafka::Headers
+        payload     => "my_message",
+        topic       => "my_topic",
+        key         => "my_key",    # optional
+        timestamp   => 1234567,   # optional, if not specified current local timestamp will be used
+        partition   => 0          # optional, if not specified internal librdkafka partitioner will be used
+        headers     => $headers,  # Optional, see Net::Kafka::Headers
     )->then(sub {
         my $delivery_report = shift;
-        echo "Message is sent with offset " . $delivery_report->{offset};
+        print "Message is sent with offset " . $delivery_report->{offset};
     })->catch(sub {
         my $error = shift;
         print $error->{error} . "\n";
@@ -518,7 +509,15 @@ Message offset is truncated to 32 bit if perl is compiled without support for 64
 
 =head1 SEE ALSO
 
+=over
+
+=item *
 L<https://github.com/edenhill/librdkafka>
+
+=item *
+L<https://github.com/trinitum/perl-Kafka-Librd>
+
+=back
 
 =head1 LICENSE AND COPYRIGHT
 
