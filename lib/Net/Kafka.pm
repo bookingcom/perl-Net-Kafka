@@ -433,6 +433,15 @@ support 64 bit integers.
 
 return message key
 
+=item timestamp()
+
+    my ($ts, $ts_type) = $msg->timestamp();
+ 
+ return the timestamp (in miliseconds) and the timestamp type. The timestamp
+ type is one of the constants that we can import,
+ C<RD_KAFKA_TIMESTAMP_NOT_AVAILABLE>, C<RD_KAFKA_TIMESTAMP_CREATE_TIME> or
+ C<RD_KAFKA_TIMESTAMP_LOG_APPEND_TIME>.
+
 =item payload()
 
 return message payload
