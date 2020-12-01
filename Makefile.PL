@@ -5,6 +5,7 @@ use warnings;
 use Config;
 use ExtUtils::MakeMaker;
 use ExtUtils::PkgConfig;
+use Text::ParseWords qw(shellwords);
 
 use constant LIBRDKAFKA_MIN_VERSION => "1.0.0";
 
@@ -18,41 +19,78 @@ $ENV{PKG_CONFIG_PATH} .= ':/usr/local/opt/openssl/lib/pkgconfig/'
 # location, meaning that without some tweaking like above,
 # we never get values for rdkafka.
 
-my %makemaker_args = (
-    LIBS => ['-lpthread -lrdkafka'],
-);
+sub prepare_lddlflags {
+    my ($lddlflags) = @_;
+    # `-Wl,-z,now` breaks static linking to librdkafka.a, and
+    # the perl you get from pacman in ArchLinux has that by default
+    # in lddlflags.
+    # Similar with --as-needed
+    $lddlflags =~ s<,-z[,= ]now><>g;
+    $lddlflags =~ s<,--as-needed\b><>g;
+    $lddlflags =~ s<-Wl\s>< >g; # did we remove every linker option?
+    return $lddlflags;
+}
+
+my @archive_after;
+my $makemaker_libs = [];
+my $makemaker_inc  = '';
+
+my $ccflags    = $Config{'ccflags'} // '';
+my $lddlflags  = prepare_lddlflags($Config{'lddlflags'} // '');
 
 # If you have a local librdkafka installation and you want to use that instead
 # of the system-wide, do something like:
 # PKG_CONFIG_PATH=/usr/local/lib/pkgconfig perl Makefile.PL
 # or whatever is the actual installation path
-my %rdkafka;
 eval {
-    %rdkafka = ExtUtils::PkgConfig->find('rdkafka');
+    my %rdkafka = ExtUtils::PkgConfig->find('rdkafka');
+    $makemaker_libs = '-lpthread -lrdkafka';
+    $lddlflags    .= ' ' . $rdkafka{libs};
+    $makemaker_inc = $rdkafka{cflags};
+    warn sprintf(
+        "WARNING: Installed librdkafka version %s is lower than tested %s",
+        $rdkafka{modversion},
+        LIBRDKAFKA_MIN_VERSION
+    ) if $rdkafka{modversion} lt LIBRDKAFKA_MIN_VERSION;
+
+    print "Compiling Net::Kafka with librdkafka $rdkafka{modversion}\n\n";
+
     1;
 } or do {
     my $pkg_config_error = $@ || 'Zombie error';
 
     eval {
         require Alien::librdkafka;
-        my $dist_dir = Alien::librdkafka->dist_dir;
-        local $ENV{PKG_CONFIG_PATH} = $ENV{PKG_CONFIG_PATH} // '';
-        # TODO: broken for Windows
-        $ENV{PKG_CONFIG_PATH} .= ':' . File::Spec->catdir($dist_dir, qw<lib pkgconfig>);
-        # Try again, first for the static version (since linking to the
-        # shared library when it comes from some Perl package will make it
-        # unreachable at runtime)
-        eval {
-            %rdkafka = ExtUtils::PkgConfig->find('rdkafka-static');
-            $makemaker_args{LDDLFLAGS} = join ' ',
-                $Config{lddlflags},
-                $rdkafka{libs},
-            ;
-            $makemaker_args{LIBS} = ['-lpthread'];
-            1;
-        } or do {
-            %rdkafka = ExtUtils::PkgConfig->find('rdkafka');
-        };
+        $makemaker_inc .= ' ' . Alien::librdkafka->cflags;
+        my $libs = Alien::librdkafka->install_type eq 'share'
+             ? Alien::librdkafka->libs_static || Alien::librdkafka->libs
+             : Alien::librdkafka->libs
+        ;
+        # cmake/OSX bug: -lz gets transformed into
+        #   -l/abs/path/to/libz.tbd
+        # in systems with Apple's "built-in dynamic linker cache"
+        $libs =~ s<\B-l/></>g;
+
+        my $lib_ext = $Config{lib_ext};
+        foreach my $maybe_lib ( shellwords($libs) ) {
+            if ( $maybe_lib =~ m/\B-l(\S+)/ ) {
+                # -lfoo
+                push @$makemaker_libs, $maybe_lib;
+            }
+            elsif ( $maybe_lib =~ m<-L(\S+)> ) {
+                my $lib_dir = $1;
+                # /path/to/libs
+                # add '-Wl,-rpath=$dir'
+                $libs = '-Wl,-rpath,' . $lib_dir . ' ' . $libs;
+            }
+            elsif ( $maybe_lib =~ m<^/.+$lib_ext$> ) {
+                # .a file in pkg-config --libs output -- this needs to come after the -o
+                push @archive_after, $maybe_lib;
+            }
+        }
+
+        $lddlflags .= ' ' . $libs;
+
         1;
     } or do {
         my $alien_librdkafka_error = $@ || 'Zombie error';
@@ -63,17 +101,13 @@ eval {
     };
 };
 
-$makemaker_args{INC} = $rdkafka{cflags};
-
-warn sprintf(
-    "WARNING: Installed librdkafka version %s is lower than tested %s",
-    $rdkafka{modversion},
-    LIBRDKAFKA_MIN_VERSION
-) if $rdkafka{modversion} lt LIBRDKAFKA_MIN_VERSION;
-
-print "Compiling Net::Kafka with librdkafka $rdkafka{modversion}\n\n";
 
 WriteMakefile(
+    INC          => $makemaker_inc,
+    LIBS         => $makemaker_libs,
+    LDDLFLAGS    => $lddlflags,
+    CCFLAGS      => $ccflags,
+    PERL_ARCHIVE_AFTER => join(' ', @archive_after),
     NAME          => 'Net::Kafka',
     DISTNAME      => 'Net-Kafka',
     AUTHOR        => [
@@ -91,7 +125,6 @@ WriteMakefile(
     LICENSE       => 'perl',
     VERSION_FROM  => 'lib/Net/Kafka.pm',
     ABSTRACT_FROM => 'lib/Net/Kafka.pm',
-    %makemaker_args,
     OBJECT        => '$(O_FILES)',
     TYPEMAPS      => ['typemap'],
     PREREQ_PM           => {
